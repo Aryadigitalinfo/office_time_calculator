@@ -83,37 +83,37 @@ def main():
             
             col1, col2 = st.columns(2)
 
-with col1:
-    st.metric(
-        "Work Sessions", 
-        str(len(result["sessions"])),
-        help="Number of work sessions recorded"
-    )
-    st.subheader("Work Sessions")
-    for i, s in enumerate(result["sessions"], 1):
-        in_label = s["in"].strftime("%Y-%m-%d %H:%M")
-        out_label = ("ONGOING (now " + s["out"].strftime("%Y-%m-%d %H:%M") + ")") if s["ongoing"] else s["out"].strftime("%Y-%m-%d %H:%M")
-        mins = s["seconds"] // 60
-        h, m = divmod(mins, 60)
-        dur = f"{h}h {m}m" if h else f"{m}m"
-        st.write(f"**Session {i}:** {in_label} → {out_label} = **{dur}**")
-
-with col2:
-    st.metric(
-        "Break Sessions", 
-        str(len(result["breaks"])),
-        help="Number of break sessions recorded"
-    )
-    st.subheader("Break Sessions")
-    if result["breaks"]:
-        for i, b in enumerate(result["breaks"], 1):
-            start_label = b["start"].strftime("%Y-%m-%d %H:%M")
-            end_label = b["end"].strftime("%Y-%m-%d %H:%M")
-            mins = b["seconds"] // 60
-            h, m = divmod(mins, 60)
-            dur = f"{h}h {m}m" if h else f"{m}m"
-            st.write(f"**Break {i}:** {start_label} → {end_label} = **{dur}**")
-    else:
-        st.info("No breaks detected.")
+            with col1:
+                st.metric(
+                    "Work Sessions", 
+                    str(len(result["sessions"])),
+                    help="Number of work sessions recorded"
+                )
+                st.subheader("Work Sessions")
+                for i, s in enumerate(result["sessions"], 1):
+                    in_label = s["in"].strftime("%Y-%m-%d %H:%M")
+                    out_label = ("ONGOING (now " + s["out"].strftime("%Y-%m-%d %H:%M") + ")") if s["ongoing"] else s["out"].strftime("%Y-%m-%d %H:%M")
+                    mins = s["seconds"] // 60
+                    h, m = divmod(mins, 60)
+                    dur = f"{h}h {m}m" if h else f"{m}m"
+                    st.write(f"**Session {i}:** {in_label} → {out_label} = **{dur}**")
+            
+            with col2:
+                st.metric(
+                    "Break Sessions", 
+                    str(len(result["breaks"])),
+                    help="Number of break sessions recorded"
+                )
+                st.subheader("Break Sessions")
+                if result["breaks"]:
+                    for i, b in enumerate(result["breaks"], 1):
+                        start_label = b["start"].strftime("%Y-%m-%d %H:%M")
+                        end_label = b["end"].strftime("%Y-%m-%d %H:%M")
+                        mins = b["seconds"] // 60
+                        h, m = divmod(mins, 60)
+                        dur = f"{h}h {m}m" if h else f"{m}m"
+                        st.write(f"**Break {i}:** {start_label} → {end_label} = **{dur}**")
+                else:
+                    st.info("No breaks detected.")
 if __name__ == "__main__":
     main()
