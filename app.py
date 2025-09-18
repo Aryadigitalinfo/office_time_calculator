@@ -14,26 +14,15 @@ def main():
     st.markdown("Paste your biometric log data below to calculate work and break times.")
     
     # Timezone selection
-    timezones = [
-        'UTC', 'Asia/Kolkata', 'Asia/Dubai', 'Europe/London', 
-        'US/Eastern', 'US/Central', 'US/Pacific', 'Europe/Paris',
-        'Asia/Singapore', 'Australia/Sydney', 'Asia/Tokyo'
-    ]
-    
-    selected_timezone = st.selectbox(
-        "Select your timezone",
-        timezones,
-        index=1,  # Default to Asia/Kolkata
-        help="Choose the timezone for your location"
-    )
-    
-    # Display current time in selected timezone
     try:
-        tz = pytz.timezone(selected_timezone)
-        current_time = st.empty()
-        current_time.info(f"Current time in {selected_timezone}: {datetime.now(tz).strftime('%Y-%m-%d %H:%M %Z')}")
+        from pytz import timezone
+        ist = timezone('Asia/Kolkata')
+        current_time = datetime.now(ist).strftime('%Y-%m-%d %H:%M %Z')
+        st.info(f"Current time (IST): {current_time}")
     except:
-         pass
+        # Fallback without timezone info
+        current_time = datetime.now().strftime('%Y-%m-%d %H:%M')
+        st.info(f"Current time: {current_time}")
     
     # Input area
     raw_text = st.text_area(
