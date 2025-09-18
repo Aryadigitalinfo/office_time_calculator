@@ -40,11 +40,11 @@ def main():
             # Use fixed Asia/Kolkata timezone
             result = calculate_office_time(raw_text, 'Asia/Kolkata')
             
-            st.success("Calculation completed! (Using IST timezone)")
+            # st.success("Calculation completed! (Using IST timezone)")
             
             # Display current time used for calculation
             if 'current_time' in result:
-                st.info(f"Calculation based on current time: {result['current_time']}")
+                # st.info(f"Calculation based on current time: {result['current_time']}")
             
             # Summary metrics in columns
             col_summary1, col_summary2, col_summary3, col_summary4 = st.columns(4)
