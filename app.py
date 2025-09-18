@@ -18,7 +18,7 @@ def main():
         from pytz import timezone
         ist = timezone('Asia/Kolkata')
         current_time = datetime.now(ist).strftime('%Y-%m-%d %H:%M %Z')
-        st.info(f"Current time (IST): {current_time}")
+        # st.info(f"Current time (IST): {current_time}")
     except:
         pass
         # Fallback without timezone info
@@ -71,16 +71,16 @@ def main():
                 st.metric(
                     "Remaining Work", 
                     f"{rw_h}h {rw_m}m",
-                    delta=f"{'-' if rw_h > 0 or rw_m > 0 else ''}{rw_h}h {rw_m}m",
-                    delta_color="inverse"
+                    # delta=f"{'-' if rw_h > 0 or rw_m > 0 else ''}{rw_h}h {rw_m}m",
+                    # delta_color="inverse"
                 )
             
             with col_summary4:
                 st.metric(
                     "Remaining Break", 
                     f"{rb_h}h {rb_m}m",
-                    delta=f"{'-' if rb_h > 0 or rb_m > 0 else ''}{rb_h}h {rb_m}m",
-                    delta_color="inverse"
+                    # delta=f"{'-' if rb_h > 0 or rb_m > 0 else ''}{rb_h}h {rb_m}m",
+                    # delta_color="inverse"
                 )
             
             # Session details in two columns
