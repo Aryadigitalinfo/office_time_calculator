@@ -1,6 +1,7 @@
 # app.py
 import streamlit as st
 from calculator import calculate_office_time
+import pytz
 
 def main():
     st.set_page_config(
@@ -12,6 +13,28 @@ def main():
     st.title("⏰ Office Time Calculator")
     st.markdown("Paste your biometric log data below to calculate work and break times.")
     
+    # Timezone selection
+    timezones = [
+        'UTC', 'Asia/Kolkata', 'Asia/Dubai', 'Europe/London', 
+        'US/Eastern', 'US/Central', 'US/Pacific', 'Europe/Paris',
+        'Asia/Singapore', 'Australia/Sydney', 'Asia/Tokyo'
+    ]
+    
+    selected_timezone = st.selectbox(
+        "Select your timezone",
+        timezones,
+        index=1,  # Default to Asia/Kolkata
+        help="Choose the timezone for your location"
+    )
+    
+    # Display current time in selected timezone
+    try:
+        tz = pytz.timezone(selected_timezone)
+        current_time = st.empty()
+        current_time.info(f"Current time in {selected_timezone}: {datetime.now(tz).strftime('%Y-%m-%d %H:%M %Z')}")
+    except:
+        st.warning("Could not display current time information")
+    
     # Input area
     raw_text = st.text_area(
         "Biometric Log Input",
@@ -19,19 +42,19 @@ def main():
         height=200
     )
     
-    # Calculate button
     if st.button("Calculate Times", type="primary"):
         if not raw_text.strip():
             st.error("Please paste your biometric log data.")
             return
         
         try:
-            result = calculate_office_time(raw_text)
+            result = calculate_office_time(raw_text, selected_timezone)
             
-            # Display results
-            st.success("Calculation completed!")
+            st.success(f"Calculation completed! (Using {selected_timezone} timezone)")
             
-            # Summary cards
+            # Display current time used for calculation
+            st.info(f"Calculation based on current time: {result.get('current_time', 'N/A')}")
+            
             col1, col2, col3, col4 = st.columns(4)
             
             with col1:
@@ -48,7 +71,6 @@ def main():
                     help="Target: 1h 30m"
                 )
             
-            # Remaining times
             rw_h, rw_m = result["remaining_work"]
             rb_h, rb_m = result["remaining_break"]
             
@@ -104,6 +126,6 @@ def main():
                     st.write(f"**Break {i}:** {start_label} → {end_label} = **{dur}**")
             else:
                 st.info("No breaks detected.")
-
+    
 if __name__ == "__main__":
     main()
