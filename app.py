@@ -5,12 +5,12 @@ from datetime import datetime
 
 def main():
     st.set_page_config(
-        page_title="Office Time Calculator", 
+        page_title="Time Calculator", 
         page_icon="⏰",
         layout="wide"
     )
     
-    st.title("⏰ Office Time Calculator")
+    st.title("⏰ Time Calculator")
     st.markdown("Paste your biometric log data below to calculate work and break times.")
     
     # Display current time in IST
