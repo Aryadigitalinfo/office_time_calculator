@@ -1,7 +1,7 @@
 # app.py
 import streamlit as st
 from calculator import calculate_office_time
-import pytz
+from datetime import datetime
 
 def main():
     st.set_page_config(
@@ -13,7 +13,7 @@ def main():
     st.title("⏰ Office Time Calculator")
     st.markdown("Paste your biometric log data below to calculate work and break times.")
     
-    # Timezone selection
+    # Display current time in IST
     try:
         from pytz import timezone
         ist = timezone('Asia/Kolkata')
@@ -37,12 +37,14 @@ def main():
             return
         
         try:
-            result = calculate_office_time(raw_text, selected_timezone)
+            # Use fixed Asia/Kolkata timezone
+            result = calculate_office_time(raw_text, 'Asia/Kolkata')
             
-            # st.success(f"Calculation completed! (Using {selected_timezone} timezone)")
+            st.success("Calculation completed! (Using IST timezone)")
             
             # Display current time used for calculation
-            # st.info(f"Calculation based on current time: {result.get('current_time', 'N/A')}")
+            if 'current_time' in result:
+                st.info(f"Calculation based on current time: {result['current_time']}")
             
             col1, col2, col3, col4 = st.columns(4)
             
@@ -67,54 +69,51 @@ def main():
                 st.metric(
                     "Remaining Work", 
                     f"{rw_h}h {rw_m}m",
-                    # delta=f"{'-' if rw_h > 0 or rw_m > 0 else ''}{rw_h}h {rw_m}m",
-                    # delta_color="inverse"
+                    delta=f"{'-' if rw_h > 0 or rw_m > 0 else ''}{rw_h}h {rw_m}m",
+                    delta_color="inverse"
                 )
             
             with col4:
                 st.metric(
                     "Remaining Break", 
                     f"{rb_h}h {rb_m}m",
-                    # delta=f"{'-' if rb_h > 0 or rb_m > 0 else ''}{rb_h}h {rb_m}m",
-                    # delta_color="inverse"
+                    delta=f"{'-' if rb_h > 0 or rb_m > 0 else ''}{rb_h}h {rb_m}m",
+                    delta_color="inverse"
                 )
             
             col1, col2 = st.columns(2)
-        except Exception as e:
-            st.error(f"An error occurred during calculation: {e}")
 
-        with col1:
-            st.metric(
-                "Work Sessions", 
-                str(len(result["sessions"])),
-                help="Number of work sessions recorded"
-            )
-            st.subheader("Work Sessions")
-            for i, s in enumerate(result["sessions"], 1):
-                in_label = s["in"].strftime("%Y-%m-%d %H:%M")
-                out_label = ("ONGOING (now " + s["out"].strftime("%Y-%m-%d %H:%M") + ")") if s["ongoing"] else s["out"].strftime("%Y-%m-%d %H:%M")
-                mins = s["seconds"] // 60
-                h, m = divmod(mins, 60)
-                dur = f"{h}h {m}m" if h else f"{m}m"
-                st.write(f"**Session {i}:** {in_label} → {out_label} = **{dur}**")
+with col1:
+    st.metric(
+        "Work Sessions", 
+        str(len(result["sessions"])),
+        help="Number of work sessions recorded"
+    )
+    st.subheader("Work Sessions")
+    for i, s in enumerate(result["sessions"], 1):
+        in_label = s["in"].strftime("%Y-%m-%d %H:%M")
+        out_label = ("ONGOING (now " + s["out"].strftime("%Y-%m-%d %H:%M") + ")") if s["ongoing"] else s["out"].strftime("%Y-%m-%d %H:%M")
+        mins = s["seconds"] // 60
+        h, m = divmod(mins, 60)
+        dur = f"{h}h {m}m" if h else f"{m}m"
+        st.write(f"**Session {i}:** {in_label} → {out_label} = **{dur}**")
 
-        with col2:
-            st.metric(
-                "Break Sessions", 
-                str(len(result["breaks"])),
-                help="Number of break sessions recorded"
-            )
-            st.subheader("Break Sessions")
-            if result["breaks"]:
-                for i, b in enumerate(result["breaks"], 1):
-                    start_label = b["start"].strftime("%Y-%m-%d %H:%M")
-                    end_label = b["end"].strftime("%Y-%m-%d %H:%M")
-                    mins = b["seconds"] // 60
-                    h, m = divmod(mins, 60)
-                    dur = f"{h}h {m}m" if h else f"{m}m"
-                    st.write(f"**Break {i}:** {start_label} → {end_label} = **{dur}**")
-            else:
-                st.info("No breaks detected.")
-    
+with col2:
+    st.metric(
+        "Break Sessions", 
+        str(len(result["breaks"])),
+        help="Number of break sessions recorded"
+    )
+    st.subheader("Break Sessions")
+    if result["breaks"]:
+        for i, b in enumerate(result["breaks"], 1):
+            start_label = b["start"].strftime("%Y-%m-%d %H:%M")
+            end_label = b["end"].strftime("%Y-%m-%d %H:%M")
+            mins = b["seconds"] // 60
+            h, m = divmod(mins, 60)
+            dur = f"{h}h {m}m" if h else f"{m}m"
+            st.write(f"**Break {i}:** {start_label} → {end_label} = **{dur}**")
+    else:
+        st.info("No breaks detected.")
 if __name__ == "__main__":
     main()
