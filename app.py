@@ -46,16 +46,17 @@ def main():
             if 'current_time' in result:
                 st.info(f"Calculation based on current time: {result['current_time']}")
             
-            col1, col2, col3, col4 = st.columns(4)
+            # Summary metrics in columns
+            col_summary1, col_summary2, col_summary3, col_summary4 = st.columns(4)
             
-            with col1:
+            with col_summary1:
                 st.metric(
                     "Total Work Time", 
                     f"{result['work_hours']}h {result['work_minutes']}m",
                     help="Target: 7h 30m"
                 )
             
-            with col2:
+            with col_summary2:
                 st.metric(
                     "Total Break Time", 
                     f"{result['break_hours']}h {result['break_minutes']}m",
@@ -65,7 +66,7 @@ def main():
             rw_h, rw_m = result["remaining_work"]
             rb_h, rb_m = result["remaining_break"]
             
-            with col3:
+            with col_summary3:
                 st.metric(
                     "Remaining Work", 
                     f"{rw_h}h {rw_m}m",
@@ -73,7 +74,7 @@ def main():
                     delta_color="inverse"
                 )
             
-            with col4:
+            with col_summary4:
                 st.metric(
                     "Remaining Break", 
                     f"{rb_h}h {rb_m}m",
@@ -81,6 +82,7 @@ def main():
                     delta_color="inverse"
                 )
             
+            # Session details in two columns
             col1, col2 = st.columns(2)
 
             with col1:
@@ -97,7 +99,7 @@ def main():
                     h, m = divmod(mins, 60)
                     dur = f"{h}h {m}m" if h else f"{m}m"
                     st.write(f"**Session {i}:** {in_label} → {out_label} = **{dur}**")
-            
+
             with col2:
                 st.metric(
                     "Break Sessions", 
@@ -115,5 +117,10 @@ def main():
                         st.write(f"**Break {i}:** {start_label} → {end_label} = **{dur}**")
                 else:
                     st.info("No breaks detected.")
+                
+        except Exception as e:
+            st.error(f"Error processing the input: {str(e)}")
+    
+   
 if __name__ == "__main__":
     main()
