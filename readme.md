@@ -1,4 +1,4 @@
-# Office Time Calculator
+# Time Calculator
 
 A Streamlit web application that calculates work and break times from biometric log data.
 
