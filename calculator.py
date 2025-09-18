@@ -1,25 +1,50 @@
 # calculator.py
 import re
 from datetime import datetime, timedelta
+import pytz
 
-def calculate_office_time(raw_text):
-    now = datetime.now().replace(second=0, microsecond=0)
+def calculate_office_time(raw_text, user_timezone='UTC'):
+    """
+    Calculate office time from biometric log data
+    
+    Args:
+        raw_text: The biometric log text
+        user_timezone: Timezone string (e.g., 'Asia/Kolkata', 'UTC', 'US/Eastern')
+    """
+    try:
+        # Get timezone object
+        tz = pytz.timezone(user_timezone)
+        # Get current time in user's timezone
+        now = datetime.now(tz).replace(second=0, microsecond=0)
+    except:
+        # Fallback to UTC if timezone is invalid
+        now = datetime.utcnow().replace(second=0, microsecond=0)
+    
     time_strs = re.findall(r"\b\d{1,2}:\d{2}\b", raw_text)
     if not time_strs:
         raise ValueError("No valid HH:MM times found in input.")
 
+    # Parse times without timezone first
     times_only = [datetime.strptime(ts, "%H:%M").time() for ts in time_strs]
 
+    # Convert to timezone-aware datetime
     today = now.date()
     first_dt_today = datetime.combine(today, times_only[0])
+    first_dt_today = tz.localize(first_dt_today) if hasattr(tz, 'localize') else first_dt_today
 
-    # Automatically determine if first entry is from previous day
+    # Determine base date
     base_date = today - timedelta(days=1) if first_dt_today > now else today
 
     datetimes = []
     prev = None
     for t in times_only:
         candidate = datetime.combine(base_date, t)
+        # Make timezone-aware
+        if hasattr(tz, 'localize'):
+            candidate = tz.localize(candidate)
+        else:
+            candidate = candidate.replace(tzinfo=tz)
+        
         if prev is None:
             datetimes.append(candidate)
             prev = candidate
@@ -77,5 +102,6 @@ def calculate_office_time(raw_text):
         "sessions": sessions,
         "breaks": breaks,
         "remaining_work": divmod(remaining_work, 60),
-        "remaining_break": divmod(remaining_break, 60)
+        "remaining_break": divmod(remaining_break, 60),
+        "current_time": now.strftime("%Y-%m-%d %H:%M %Z")
     }
