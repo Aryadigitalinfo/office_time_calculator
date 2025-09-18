@@ -50,10 +50,10 @@ def main():
         try:
             result = calculate_office_time(raw_text, selected_timezone)
             
-            st.success(f"Calculation completed! (Using {selected_timezone} timezone)")
+            # st.success(f"Calculation completed! (Using {selected_timezone} timezone)")
             
             # Display current time used for calculation
-            st.info(f"Calculation based on current time: {result.get('current_time', 'N/A')}")
+            # st.info(f"Calculation based on current time: {result.get('current_time', 'N/A')}")
             
             col1, col2, col3, col4 = st.columns(4)
             
@@ -78,16 +78,16 @@ def main():
                 st.metric(
                     "Remaining Work", 
                     f"{rw_h}h {rw_m}m",
-                    delta=f"{'-' if rw_h > 0 or rw_m > 0 else ''}{rw_h}h {rw_m}m",
-                    delta_color="inverse"
+                    # delta=f"{'-' if rw_h > 0 or rw_m > 0 else ''}{rw_h}h {rw_m}m",
+                    # delta_color="inverse"
                 )
             
             with col4:
                 st.metric(
                     "Remaining Break", 
                     f"{rb_h}h {rb_m}m",
-                    delta=f"{'-' if rb_h > 0 or rb_m > 0 else ''}{rb_h}h {rb_m}m",
-                    delta_color="inverse"
+                    # delta=f"{'-' if rb_h > 0 or rb_m > 0 else ''}{rb_h}h {rb_m}m",
+                    # delta_color="inverse"
                 )
             
             col1, col2 = st.columns(2)
