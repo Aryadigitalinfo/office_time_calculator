@@ -20,8 +20,9 @@ def main():
         current_time = datetime.now(ist).strftime('%Y-%m-%d %H:%M %Z')
         st.info(f"Current time (IST): {current_time}")
     except:
+        pass
         # Fallback without timezone info
-        current_time = datetime.now().strftime('%Y-%m-%d %H:%M')
+        # current_time = datetime.now().strftime('%Y-%m-%d %H:%M')
         # st.info(f"Current time: {current_time}")
     
     # Input area
