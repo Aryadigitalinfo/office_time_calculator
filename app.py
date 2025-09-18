@@ -33,7 +33,7 @@ def main():
         current_time = st.empty()
         current_time.info(f"Current time in {selected_timezone}: {datetime.now(tz).strftime('%Y-%m-%d %H:%M %Z')}")
     except:
-        # st.warning("Could not display current time information")
+         st.warning()
     
     # Input area
     raw_text = st.text_area(
