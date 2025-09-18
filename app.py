@@ -22,7 +22,7 @@ def main():
     except:
         # Fallback without timezone info
         current_time = datetime.now().strftime('%Y-%m-%d %H:%M')
-        st.info(f"Current time: {current_time}")
+        # st.info(f"Current time: {current_time}")
     
     # Input area
     raw_text = st.text_area(
@@ -43,7 +43,7 @@ def main():
             # st.success("Calculation completed! (Using IST timezone)")
             
             # Display current time used for calculation
-            if 'current_time' in result:
+            # if 'current_time' in result:
                 # st.info(f"Calculation based on current time: {result['current_time']}")
             
             # Summary metrics in columns
