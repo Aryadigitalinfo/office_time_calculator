@@ -86,6 +86,10 @@ def calculate_office_time(raw_text, user_timezone='UTC'):
     work_h, work_m = divmod(work_minutes, 60)
     break_minutes = total_break_seconds // 60
     break_h, break_m = divmod(break_minutes, 60)
+    
+    # Calculate total time (work + break)
+    total_time_minutes = work_minutes + break_minutes
+    total_time_h, total_time_m = divmod(total_time_minutes, 60)
 
     # Targets
     target_work = 7 * 60 + 30   # 7h 30m = 450 minutes
@@ -99,6 +103,8 @@ def calculate_office_time(raw_text, user_timezone='UTC'):
         "work_minutes": int(work_m),
         "break_hours": int(break_h),
         "break_minutes": int(break_m),
+        "total_time_hours": int(total_time_h),
+        "total_time_minutes": int(total_time_m),
         "sessions": sessions,
         "breaks": breaks,
         "remaining_work": divmod(remaining_work, 60),
