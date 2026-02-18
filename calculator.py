@@ -3,57 +3,68 @@ import re
 from datetime import datetime, timedelta
 import pytz
 
+
 def calculate_office_time(raw_text, user_timezone='UTC'):
     """
     Calculate office time from biometric log data
-    
+
     Args:
         raw_text: The biometric log text
         user_timezone: Timezone string (e.g., 'Asia/Kolkata', 'UTC', 'US/Eastern')
     """
+
+    # -----------------------------
+    # Timezone Handling
+    # -----------------------------
     try:
-        # Get timezone object
         tz = pytz.timezone(user_timezone)
-        # Get current time in user's timezone
         now = datetime.now(tz).replace(second=0, microsecond=0)
-    except:
-        # Fallback to UTC if timezone is invalid
-        now = datetime.utcnow().replace(second=0, microsecond=0)
-    
+    except Exception:
+        tz = pytz.utc
+        now = datetime.utcnow().replace(second=0, microsecond=0).replace(tzinfo=pytz.utc)
+
+    # -----------------------------
+    # Extract Time Strings
+    # -----------------------------
     time_strs = re.findall(r"\b\d{1,2}:\d{2}\b", raw_text)
     if not time_strs:
         raise ValueError("No valid HH:MM times found in input.")
 
-    # Parse times without timezone first
     times_only = [datetime.strptime(ts, "%H:%M").time() for ts in time_strs]
 
-    # Convert to timezone-aware datetime
+    # -----------------------------
+    # Determine Base Date
+    # -----------------------------
     today = now.date()
     first_dt_today = datetime.combine(today, times_only[0])
-    first_dt_today = tz.localize(first_dt_today) if hasattr(tz, 'localize') else first_dt_today
+    first_dt_today = tz.localize(first_dt_today)
 
-    # Determine base date
     base_date = today - timedelta(days=1) if first_dt_today > now else today
 
+    # -----------------------------
+    # Build Chronological Datetimes
+    # -----------------------------
     datetimes = []
     prev = None
+
     for t in times_only:
         candidate = datetime.combine(base_date, t)
-        # Make timezone-aware
-        if hasattr(tz, 'localize'):
-            candidate = tz.localize(candidate)
-        else:
-            candidate = candidate.replace(tzinfo=tz)
-        
+        candidate = tz.localize(candidate)
+
         if prev is None:
             datetimes.append(candidate)
             prev = candidate
             continue
+
         while candidate < prev:
             candidate += timedelta(days=1)
+
         datetimes.append(candidate)
         prev = candidate
 
+    # -----------------------------
+    # Calculate Work & Break Sessions
+    # -----------------------------
     sessions = []
     breaks = []
     total_work_seconds = 0
@@ -62,6 +73,7 @@ def calculate_office_time(raw_text, user_timezone='UTC'):
 
     for i in range(0, n, 2):
         in_dt = datetimes[i]
+
         if i + 1 < n:
             out_dt = datetimes[i + 1]
             ongoing = False
@@ -73,39 +85,59 @@ def calculate_office_time(raw_text, user_timezone='UTC'):
 
         diff_seconds = int((out_dt - in_dt).total_seconds())
         total_work_seconds += diff_seconds
-        sessions.append({"in": in_dt, "out": out_dt, "seconds": diff_seconds, "ongoing": ongoing})
 
+        sessions.append({
+            "in": in_dt,
+            "out": out_dt,
+            "seconds": diff_seconds,
+            "ongoing": ongoing
+        })
+
+        # Calculate break (if next session exists)
         if not ongoing and i + 2 < n:
             next_in = datetimes[i + 2]
             gap = int((next_in - out_dt).total_seconds())
             total_break_seconds += gap
-            breaks.append({"start": out_dt, "end": next_in, "seconds": gap})
 
-    # Convert totals
+            breaks.append({
+                "start": out_dt,
+                "end": next_in,
+                "seconds": gap
+            })
+
+    # -----------------------------
+    # Convert Totals
+    # -----------------------------
     work_minutes = total_work_seconds // 60
     work_h, work_m = divmod(work_minutes, 60)
+
     break_minutes = total_break_seconds // 60
     break_h, break_m = divmod(break_minutes, 60)
-    
-    # Calculate total time (work + break)
+
     total_time_minutes = work_minutes + break_minutes
     total_time_h, total_time_m = divmod(total_time_minutes, 60)
-        
-    # Total target time (work + break)
-    target_total_minutes = target_work + target_break  # 450 + 90 = 540 minutes
-    remaining_total_minutes = max(0, target_total_minutes - total_time_minutes)
- 
-    # Expected completion time
-    expected_completion_dt = now + timedelta(minutes=remaining_total_minutes)
-    expected_completion_str = expected_completion_dt.strftime("%Y-%m-%d %H:%M %Z")
 
-    # Targets
-    target_work = 7 * 60 + 30   # 7h 30m = 450 minutes
-    target_break = 90           # 90 minutes
+    # -----------------------------
+    # Targets (Moved BEFORE usage)
+    # -----------------------------
+    target_work = 7 * 60 + 30   # 7h 30m
+    target_break = 90           # 1h 30m
+
+    target_total_minutes = target_work + target_break
 
     remaining_work = max(0, target_work - work_minutes)
     remaining_break = max(0, target_break - break_minutes)
+    remaining_total_minutes = max(0, target_total_minutes - total_time_minutes)
 
+    # -----------------------------
+    # Expected Completion Time
+    # -----------------------------
+    expected_completion_dt = now + timedelta(minutes=remaining_total_minutes)
+    expected_completion_str = expected_completion_dt.strftime("%Y-%m-%d %H:%M %Z")
+
+    # -----------------------------
+    # Return Result
+    # -----------------------------
     return {
         "work_hours": int(work_h),
         "work_minutes": int(work_m),
