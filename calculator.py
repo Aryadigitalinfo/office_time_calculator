@@ -90,6 +90,14 @@ def calculate_office_time(raw_text, user_timezone='UTC'):
     # Calculate total time (work + break)
     total_time_minutes = work_minutes + break_minutes
     total_time_h, total_time_m = divmod(total_time_minutes, 60)
+        
+    # Total target time (work + break)
+    target_total_minutes = target_work + target_break  # 450 + 90 = 540 minutes
+    remaining_total_minutes = max(0, target_total_minutes - total_time_minutes)
+ 
+    # Expected completion time
+    expected_completion_dt = now + timedelta(minutes=remaining_total_minutes)
+    expected_completion_str = expected_completion_dt.strftime("%Y-%m-%d %H:%M %Z")
 
     # Targets
     target_work = 7 * 60 + 30   # 7h 30m = 450 minutes
@@ -110,4 +118,5 @@ def calculate_office_time(raw_text, user_timezone='UTC'):
         "remaining_work": divmod(remaining_work, 60),
         "remaining_break": divmod(remaining_break, 60),
         "current_time": now.strftime("%Y-%m-%d %H:%M %Z")
+        "expected_completion_time": expected_completion_str,
     }
