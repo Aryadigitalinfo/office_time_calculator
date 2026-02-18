@@ -117,6 +117,6 @@ def calculate_office_time(raw_text, user_timezone='UTC'):
         "breaks": breaks,
         "remaining_work": divmod(remaining_work, 60),
         "remaining_break": divmod(remaining_break, 60),
-        "current_time": now.strftime("%Y-%m-%d %H:%M %Z")
-        "expected_completion_time": expected_completion_str,
+        "current_time": now.strftime("%Y-%m-%d %H:%M %Z"),
+        "expected_completion_time": expected_completion_str
     }
